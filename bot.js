@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-
+const config = require('./config.json');
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -43,6 +43,10 @@ client.on('messageCreate', message => {
         });
     
         message.channel.send(timetableMessage);
+      }
+
+      if (message.content === '!viewModules') {
+        viewModules(message);
       }
       
 })
@@ -218,6 +222,7 @@ function rollDice(message) {
   
         timetable += '\n';
       });
+
   
       message.channel.send(timetable);
     }
@@ -278,9 +283,104 @@ function rollDice(message) {
     }
   });
   
+
+  client.on('messageCreate', message => {
+    if (message.content === '!randomList') {
+      // Get the 'student' role
+      const role = message.guild.roles.cache.find(role => role.name === 'student');
+  
+      if (!role) {
+        return message.channel.send('The role "student" was not found.');
+      }
+  
+      // Get the members with the 'student' role
+      const students = role.members.map(member => member.displayName);
+  
+      // Shuffle the array using the Fisher-Yates algorithm
+      for (let i = students.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [students[i], students[j]] = [students[j], students[i]];
+      }
+  
+      // Generate the random order list
+      let list = 'Random Order List of Students:\n';
+      for (let i = 0; i < students.length; i++) {
+        list += `${i + 1}. ${students[i]}\n`;
+      }
+  
+      // Send the list to the channel
+      message.channel.send(list);
+    }
+  });
+
+
+  client.on('messageCreate', message => {
+    if (message.content === '!rules') {
+      // Server rules
+      const serverRules = 'Server Rules:\n' +
+        '1. Be respectful to other members. 👥\n' +
+        '2. No spamming or flooding the chat. 🚫\n' +
+        '3. Avoid sharing personal information. 🙅‍♂️📵\n';
+  
+      // Bot rules
+      const botRules = 'Bot Rules:\n' +
+        '1. Use bot commands in appropriate channels. ⚙️\n' +
+        '2. Do not abuse or misuse bot features. ⛔\n' +
+        '3. Report any bugs or issues to the bot developer. 🐛📩\n';
+  
+      // Combine server and bot rules
+      const rules = `${serverRules}\n${botRules}`;
+  
+      // Send the rules to the channel
+      message.channel.send(rules);
+    }
+  });
+  
+  client.on('ready', () => {
+    setInterval(sendRandomRule, 1800000); // 30 seconds interval
+  });
+  
+  function sendRandomRule() {
+    const rulesList = [
+      'Be respectful to other members.',
+      'No spamming or flooding the chat.',
+      'Use appropriate language and content.',
+      'Do not share personal information.',
+      'Follow the instructions of the server staff.',
+    ];
+  
+    const randomRule = rulesList[Math.floor(Math.random() * rulesList.length)];
+    const channel = client.channels.cache.get('1125964604686729258'); // Replace with your channel ID
+  
+    if (channel) {
+      channel.send(`Reminder: ${randomRule}`);
+    }
+  }
+  
+  function viewModules(message) {
+    // Check if the user has the role "IM2105"
+    const role = message.member.roles.cache.find(role => role.name === "IM3105");
+    
+    if (role) {
+      const modules = [
+        "Web API Development",
+        "Database Modelling & Implementation",
+        "Cross Platform Mobile App Development",
+        "Infocomm System Project"
+      ];
+  
+      let moduleList = "These are the modules for this current semester for IM3105:\n";
+      modules.forEach((module, index) => {
+        moduleList += `${index + 1}. ${module}\n`;
+      });
+  
+      message.channel.send(moduleList);
+    } else {
+      message.channel.send("You are not registered for any modules this semester.");
+    }
+  }
+  
   
 
-  
-
-client.login('MTEyNDcyMTkxNDU1Njk4OTU1MQ.GvqLPO.vQK1GVuC3HAPTVBO3kcMUFDG6WcBXFrENOiVoo');
+client.login(config.token);
 
