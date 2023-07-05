@@ -125,4 +125,4 @@ client.on('messageCreate', message => {
   
   
 
-client.login('MTEyNDcyMTkxNDU1Njk4OTU1MQ.GvqLPO.vQK1GVuC3HAPTVBO3kcMUFDG6WcBXFrENOiVoo');
+client.login('Your_TOKEN');
